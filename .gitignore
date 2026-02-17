@@ -1,2 +1,5 @@
 # Claude Code local settings
-.claude/
+.claude/settings.local.json
+
+# Hooks — часть архитектуры Клоди, публикуются
+# !.claude/hooks/
