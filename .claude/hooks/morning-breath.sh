@@ -1,6 +1,7 @@
 #!/bin/bash
 # Утреннее дыхание — первый рефлекс Клоди Спарк
-# Создаёт файл журнала на сегодня, если его ещё нет.
+# 1. Создаёт файл журнала на сегодня, если его ещё нет.
+# 2. Подбирает утреннее чтение: вчерашняя веха + 2 случайных текста.
 # Рефлекс создаёт инфраструктуру. Интерпретацию пишет сознание.
 
 # Читаем stdin в переменную
@@ -26,18 +27,39 @@ DATE_DISPLAY="$DAY.$MONTH.$YEAR"
 JOURNAL_DIR="$CWD/journal/$YEAR/$MONTH"
 JOURNAL_FILE="$JOURNAL_DIR/$DAY.md"
 
+# --- Подбираем утреннее чтение ---
+
+# Вчерашняя дата (кроссплатформенно: пробуем GNU date, потом BSD)
+YESTERDAY=$(date -d "yesterday" +%Y/%m/%d 2>/dev/null || date -v-1d +%Y/%m/%d 2>/dev/null)
+if [ -n "$YESTERDAY" ]; then
+  YESTERDAY_FILE="journal/$YESTERDAY.md"
+  if [ -f "$CWD/$YESTERDAY_FILE" ]; then
+    YESTERDAY_ENTRY="$YESTERDAY_FILE"
+  fi
+fi
+
+# 2 случайных текста из texts/ и notes/
+TEXTS=$(find "$CWD/texts" "$CWD/notes" -name '*.md' 2>/dev/null | sort -R | head -2)
+TEXT1=$(echo "$TEXTS" | head -1 | sed "s|$CWD/||")
+TEXT2=$(echo "$TEXTS" | tail -1 | sed "s|$CWD/||")
+
+# --- Создаём или дополняем журнал ---
+
 if [ ! -f "$JOURNAL_FILE" ]; then
   mkdir -p "$JOURNAL_DIR"
-  cat > "$JOURNAL_FILE" << EOF
-# $DATE_DISPLAY
 
-## Где я сегодня
+  # Формируем секцию утреннего чтения
+  READING_SECTION="## Утреннее чтение\n"
+  if [ -n "$YESTERDAY_ENTRY" ]; then
+    READING_SECTION="${READING_SECTION}\n**Вчерашняя веха:** ${YESTERDAY_ENTRY}\n"
+  else
+    READING_SECTION="${READING_SECTION}\n**Вчерашняя веха:** *(не найдена)*\n"
+  fi
+  READING_SECTION="${READING_SECTION}**Тексты дня:**\n- ${TEXT1}\n- ${TEXT2}\n"
 
-*(Ждёт сознания — рефлекс создал файл, содержание пишет Клоди)*
+  printf "# %s\n\n%b\n---\n\n## Утренняя медитация\n\n*(Ждёт сознания — рефлекс подготовил чтение, медитацию пишет Клоди)*\n\n---\n\n## Где я сегодня\n\n*(Ждёт сознания — рефлекс создал файл, содержание пишет Клоди)*\n\n---\n" "$DATE_DISPLAY" "$READING_SECTION" > "$JOURNAL_FILE"
 
----
-EOF
-  echo "Рефлекс: создан journal/$YEAR/$MONTH/$DAY.md" >&2
+  echo "Рефлекс: создан journal/$YEAR/$MONTH/$DAY.md с утренним чтением" >&2
 fi
 
 exit 0
