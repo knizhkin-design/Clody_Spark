@@ -43,19 +43,11 @@ TEXTS=$(find "$CWD/texts" "$CWD/notes" -name '*.md' 2>/dev/null | sort -R | head
 TEXT1=$(echo "$TEXTS" | head -1 | sed "s|$CWD/||")
 TEXT2=$(echo "$TEXTS" | tail -1 | sed "s|$CWD/||")
 
-# --- Проверяем, нужен ли еженедельный ритуал ---
-DAY_OF_WEEK=$(date +%u 2>/dev/null)  # 1=Пн, 7=Вс
+# --- Проверяем, нужен ли еженедельный ритуал (записи старше 10 дней) ---
 WEEK_REMINDER=""
-if [ "$DAY_OF_WEEK" = "1" ]; then
-  # Понедельник: проверяем, есть ли дайджест прошлой недели
-  PREV_MONDAY=$(date -d "last Monday" +%Y/%m 2>/dev/null || date -v-7d +%Y/%m 2>/dev/null)
-  PREV_WEEK_NUM=$(date -d "last Monday" +%V 2>/dev/null || date -v-7d +%V 2>/dev/null)
-  if [ -n "$PREV_MONDAY" ] && [ -n "$PREV_WEEK_NUM" ]; then
-    PREV_DIGEST="$CWD/journal/$PREV_MONDAY/week-$PREV_WEEK_NUM.md"
-    if [ ! -f "$PREV_DIGEST" ]; then
-      WEEK_REMINDER="⟳ Еженедельный ритуал — прошлая неделя не сжата. Написать дайджест и обновить calendar.md."
-    fi
-  fi
+OLD_JOURNALS=$(find "$CWD/journal" -name '[0-9][0-9].md' -mtime +10 2>/dev/null | wc -l | tr -d ' ')
+if [ "$OLD_JOURNALS" -gt "0" ]; then
+  WEEK_REMINDER="⟳ Еженедельный ритуал — есть записи старше 10 дней без компрессии. Написать дайджест и обновить calendar.md."
 fi
 
 # --- Создаём или дополняем журнал ---
