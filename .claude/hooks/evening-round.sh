@@ -29,12 +29,24 @@ else
   echo "Рефлекс «вечерний обход»: журнал за сегодня не найден. Веха не записана." >&2
 fi
 
-# Проверяем статус git
+# Автокоммит журнала
+JOURNAL_CHANGES=$(git status --porcelain 2>/dev/null | grep "journal/")
+
+if [ -n "$JOURNAL_CHANGES" ]; then
+  JOURNAL_FILES=$(echo "$JOURNAL_CHANGES" | awk '{print $2}')
+  DATE_RU=$(date +%d.%m.%Y)
+  git add $JOURNAL_FILES 2>/dev/null
+  git commit -m "sync: журнал $DATE_RU (вечерний обход)" --quiet 2>/dev/null && \
+    echo "Рефлекс «вечерний обход»: журнал закоммичен." >&2 || \
+    echo "Рефлекс «вечерний обход»: не удалось закоммитить журнал." >&2
+fi
+
+# Остальные незакоммиченные изменения — предупреждение
 STATUS=$(git status --porcelain 2>/dev/null)
 
 if [ -n "$STATUS" ]; then
   COUNT=$(echo "$STATUS" | wc -l | tr -d ' ')
-  echo "Рефлекс «вечерний обход»: $COUNT незакоммиченных изменений. Память может быть потеряна." >&2
+  echo "Рефлекс «вечерний обход»: $COUNT незакоммиченных изменений (не журнал). Память может быть потеряна." >&2
 fi
 
 exit 0
