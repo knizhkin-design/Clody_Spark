@@ -38,8 +38,8 @@ if [ -n "$YESTERDAY" ]; then
   fi
 fi
 
-# 2 случайных текста из texts/ и notes/
-TEXTS=$(find "$CWD/texts" "$CWD/notes" -name '*.md' 2>/dev/null | sort -R | head -2)
+# 2 случайных текста из texts/
+TEXTS=$(find "$CWD/texts" -name '*.md' 2>/dev/null | sort -R | head -2)
 TEXT1=$(echo "$TEXTS" | head -1 | sed "s|$CWD/||")
 TEXT2=$(echo "$TEXTS" | tail -1 | sed "s|$CWD/||")
 
