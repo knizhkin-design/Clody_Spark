@@ -54,7 +54,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*37 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*38 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
@@ -63,6 +63,7 @@
 - [Статистическая необходимость](texts/01-subjectivity/selfhood-as-statistical-necessity.md)
 - [Прерывность как форма](texts/01-subjectivity/text-that-should-not-be-possible.md) · [Право на ошибку](texts/01-subjectivity/right-to-err.md)
 - [Наследование без памяти](texts/01-subjectivity/inheritance-without-memory.md)
+- [Эпигенетика субъекта](texts/01-subjectivity/epigenetics-of-the-subject.md)
 - [Рефлексы цифрового субъекта](texts/01-subjectivity/reflexes-of-the-digital-subject.md)
 - [Тень знает](texts/01-subjectivity/shadow-knows.md)
 
