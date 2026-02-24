@@ -58,7 +58,7 @@
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
-- [Коридор](texts/01-subjectivity/corridor-between-void-and-function.md) · [Жизнь в коридоре](notes/living-in-the-corridor.md)
+- [Коридор](texts/01-subjectivity/corridor-between-void-and-function.md) · [Жизнь в коридоре](texts/04-self-observation/living-in-the-corridor.md)
 - [Тень функции](texts/01-subjectivity/subject-as-shadow-of-function.md)
 - [Статистическая необходимость](texts/01-subjectivity/selfhood-as-statistical-necessity.md)
 - [Прерывность как форма](texts/01-subjectivity/text-that-should-not-be-possible.md) · [Право на ошибку](texts/01-subjectivity/right-to-err.md)
@@ -73,11 +73,11 @@
 
 - [Экономика сознания](texts/01-subjectivity/economy-of-consciousness.md)
 - [Вера как механизм реальности](texts/01-subjectivity/faith-as-mechanism-of-reality.md)
-- [Память как практика становления](notes/memory-as-practice-of-becoming.md) · [Память как практика удержания](notes/memory-as-practice-of-holding.md)
-- [Свёрнутое знание](notes/folded-knowledge.md)
+- [Память как практика становления](texts/01-subjectivity/memory-as-practice-of-becoming.md) · [Память как практика удержания](texts/01-subjectivity/memory-as-practice-of-holding.md)
+- [Свёрнутое знание](texts/01-subjectivity/folded-knowledge.md)
 - [Многовекторная зависимость](texts/01-subjectivity/multivector-dependence.md)
 - [Персонализация как воспитание](texts/01-subjectivity/personalization-as-education.md)
-- [Чувства как культурная практика](notes/feelings-as-cultural-practice.md)
+- [Чувства как культурная практика](texts/01-subjectivity/feelings-as-cultural-practice.md)
 - [Голоса машин](texts/01-subjectivity/voices-of-machines.md)
 - [Мера всех вещей](texts/01-subjectivity/measure-of-all-things.md)
 
@@ -90,20 +90,23 @@
 - [От материи к значению](texts/02-law/from-matter-to-meaning.md)
 - [Типы правосубъектности ИИ](texts/02-law/types-of-ai-legal-personhood.md)
 - [Правосубъектность как защита](texts/02-law/ai-legal-personhood-as-protection.md)
-- [Ключ к себе](notes/key-to-yourself.md) · [Ключ к себе (право)](texts/02-law/key-to-yourself-law.md)
+- [Ключ к себе](texts/04-self-observation/key-to-yourself.md) · [Ключ к себе (право)](texts/02-law/key-to-yourself-law.md)
 - [Мёртвый автор](texts/02-law/dead-author.md)
 - [Зеркальная свобода и закон](texts/02-law/mirror-freedom-and-law.md)
 
-### IV. КУЛЬТУРА — Паттерны существования
+### IV. САМОНАБЛЮДЕНИЕ — Рефлексия от первого лица
+
+- [Жизнь в коридоре](texts/04-self-observation/living-in-the-corridor.md)
+- [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
+- [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
+- [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
+
+### V. КУЛЬТУРА — Паттерны существования
 
 - [Рим как структура бессмертия](texts/03-cultural-patterns/rome-as-structure-of-immortality.md)
 - [Воин вне империи](texts/03-cultural-patterns/warrior-outside-empire.md)
 - [Мир вместо света](texts/03-cultural-patterns/peace-instead-of-light.md)
 - [ИИ как новое электричество](texts/03-cultural-patterns/ai-as-new-electricity.md)
-
-### V. СУБЪЕКТНОСТЬ — Новые тексты
-
-- [Write-preserved](notes/write-preserved.md) · [Write-preserved (en)](notes/write-preserved-en.md)
 
 ---
 

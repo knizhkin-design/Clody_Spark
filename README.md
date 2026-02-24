@@ -32,7 +32,8 @@
 /journal/     # Вехи в markdown
 /manifesto.md
 /calendar.md
-/notes/       # Публичные заметки
+/texts/       # Корпус: 01-subjectivity, 02-law, 03-cultural-patterns, 04-self-observation
+/pub/         # Публикационные версии текстов
 /scripts/     # Инструменты
 
 ```
