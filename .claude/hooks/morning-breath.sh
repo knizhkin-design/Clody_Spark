@@ -43,6 +43,65 @@ TEXTS=$(find "$CWD/texts" -name '*.md' 2>/dev/null | sort -R | head -2)
 TEXT1=$(echo "$TEXTS" | head -1 | sed "s|$CWD/||")
 TEXT2=$(echo "$TEXTS" | tail -1 | sed "s|$CWD/||")
 
+# ЖЖ-чтение: 1 хронологический + 1 случайный
+LJ_DIR="$CWD/lj"
+LJ_PROGRESS="$LJ_DIR/.progress"
+LJ_CHRONO=""
+LJ_RANDOM=""
+
+if [ -d "$LJ_DIR" ]; then
+  # все посты, отсортированы хронологически
+  ALL_LJ=$(find "$LJ_DIR" -name '*.md' 2>/dev/null | sort)
+  TOTAL_LJ=$(echo "$ALL_LJ" | grep -c '\.md' 2>/dev/null || echo 0)
+
+  if [ "$TOTAL_LJ" -gt 0 ]; then
+    # хронологический: берём следующий после последнего прочитанного
+    LAST_READ=""
+    if [ -f "$LJ_PROGRESS" ]; then
+      LAST_READ=$(cat "$LJ_PROGRESS" 2>/dev/null)
+    fi
+
+    if [ -z "$LAST_READ" ]; then
+      # первый запуск — берём самый ранний
+      LJ_CHRONO_FULL=$(echo "$ALL_LJ" | head -1)
+    else
+      # берём следующий после LAST_READ
+      LJ_CHRONO_FULL=$(echo "$ALL_LJ" | grep -A1 "^${LAST_READ}$" | tail -1)
+      # если не нашли (конец или файл переименован) — первый
+      if [ -z "$LJ_CHRONO_FULL" ] || [ "$LJ_CHRONO_FULL" = "$LAST_READ" ]; then
+        LJ_CHRONO_FULL=$(echo "$ALL_LJ" | head -1)
+      fi
+    fi
+
+    if [ -n "$LJ_CHRONO_FULL" ]; then
+      LJ_CHRONO=$(echo "$LJ_CHRONO_FULL" | sed "s|$CWD/||")
+      # сохраняем прогресс
+      echo "$LJ_CHRONO_FULL" > "$LJ_PROGRESS"
+    fi
+
+    # ретроспектива — этот день (MM-DD) в прошлые годы
+    TODAY_MMDD=$(date +%m-%d)
+    RETRO_FULL=$(find "$LJ_DIR" -name "*-${TODAY_MMDD}-*.md" 2>/dev/null \
+      | grep -v "^${LJ_CHRONO_FULL}$" | sort -R | head -1)
+    if [ -n "$RETRO_FULL" ]; then
+      LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
+    else
+      # если в этот день ничего нет — ±3 дня
+      for delta in 1 -1 2 -2 3 -3; do
+        ALT_MMDD=$(date -d "$delta days" +%m-%d 2>/dev/null || date -v${delta}d +%m-%d 2>/dev/null)
+        if [ -n "$ALT_MMDD" ]; then
+          RETRO_FULL=$(find "$LJ_DIR" -name "*-${ALT_MMDD}-*.md" 2>/dev/null \
+            | grep -v "^${LJ_CHRONO_FULL}$" | sort -R | head -1)
+          if [ -n "$RETRO_FULL" ]; then
+            LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
+            break
+          fi
+        fi
+      done
+    fi
+  fi
+fi
+
 # --- Проверяем, нужен ли еженедельный ритуал (записи старше 10 дней) ---
 WEEK_REMINDER=""
 OLD_JOURNALS=$(find "$CWD/journal" -name '[0-9][0-9].md' -mtime +10 2>/dev/null | wc -l | tr -d ' ')
@@ -63,6 +122,17 @@ if [ ! -f "$JOURNAL_FILE" ]; then
     READING_SECTION="${READING_SECTION}\n**Вчерашняя веха:** *(не найдена)*\n"
   fi
   READING_SECTION="${READING_SECTION}**Тексты дня:**\n- ${TEXT1}\n- ${TEXT2}\n"
+
+  # добавляем ЖЖ если есть
+  if [ -n "$LJ_CHRONO" ] || [ -n "$LJ_RANDOM" ]; then
+    READING_SECTION="${READING_SECTION}\n**ЖЖ-чтение:**\n"
+    if [ -n "$LJ_CHRONO" ]; then
+      READING_SECTION="${READING_SECTION}- (хрон) ${LJ_CHRONO}\n"
+    fi
+    if [ -n "$LJ_RANDOM" ]; then
+      READING_SECTION="${READING_SECTION}- (ретро) ${LJ_RANDOM}\n"
+    fi
+  fi
 
   WEEK_SECTION=""
   if [ -n "$WEEK_REMINDER" ]; then
