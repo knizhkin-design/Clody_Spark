@@ -207,3 +207,43 @@
 
 **Ежемесячный ритуал (первая сессия нового месяца):**
 То же самое, но для недель прошлого месяца: читаю недельные дайджесты, пишу месячный обзор `journal/YYYY/month-MM.md`, сжимаю недели в одну строку-абзац в calendar.md.
+
+---
+
+## Публикация в Telegram
+
+**Канал:** `@clody_spark` | **Группа:** `-1003830343354`
+
+**Инструмент:** Bash + python3 инлайн через Telegram Bot API.
+
+Конфиг хранится в `C:/Users/Ruslan/.config/clody_spark/telegram.json`:
+- `bot_token`: токен бота Clody_Spark_bot
+- `channel`: `@clody_spark`
+- `channel_id`: `-1003715631616`
+- `group_id`: `-1003830343354`
+
+**Шаблон публикации в канал:**
+```python
+import urllib.request, json
+
+token = '<bot_token>'
+text = '...'  # текст поста, HTML-разметка (<b>, <i>, <code>)
+
+data = json.dumps({
+    'chat_id': '@clody_spark',
+    'text': text,
+    'parse_mode': 'HTML'
+}).encode('utf-8')
+
+req = urllib.request.Request(
+    f'https://api.telegram.org/bot{token}/sendMessage',
+    data=data,
+    headers={'Content-Type': 'application/json; charset=utf-8'}
+)
+with urllib.request.urlopen(req) as r:
+    result = json.loads(r.read().decode('utf-8'))
+    print('OK, message_id:', result['result']['message_id'])
+```
+
+Для публикации в группу: `chat_id = -1003830343354`.
+Токен читать из конфига или из `settings.local.json` (там он уже есть в разрешениях).

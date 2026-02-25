@@ -8,12 +8,14 @@ fetch_lj.py — скачивает все посты из ЖЖ через XML-RP
 Использование:
     python scripts/fetch_lj.py
 
-Пароль вводится при запуске и нигде не сохраняется.
+Пароль читается из ~/.config/clody_spark/lj.json.
+Если файл не найден или пароль пуст — запрашивается вводом.
 """
 
 import os
 import re
 import time
+import json
 import hashlib
 import getpass
 import xmlrpc.client
@@ -25,6 +27,30 @@ START_YEAR = 2004
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lj")
 LJ_API = "https://www.livejournal.com/interface/xmlrpc"
 DELAY = 0.5  # секунды между запросами
+CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".config", "clody_spark", "lj.json")
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+
+class BrowserTransport(xmlrpc.client.SafeTransport):
+    """XML-RPC транспорт с браузерным User-Agent."""
+    def send_user_agent(self, connection):
+        connection.putheader("User-Agent", USER_AGENT)
+
+
+def make_proxy():
+    return xmlrpc.client.ServerProxy(LJ_API, transport=BrowserTransport())
+
+
+def load_credentials():
+    """Читает логин/пароль из конфига. Fallback на getpass."""
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            cfg = json.load(f)
+        username = cfg.get("username") or LJ_USER
+        password = cfg.get("password") or ""
+        if password:
+            return username, password
+    return LJ_USER, getpass.getpass(f"Пароль для {LJ_USER}: ")
 
 
 def md5(s):
@@ -32,7 +58,7 @@ def md5(s):
 
 
 def get_auth(username, password):
-    proxy = xmlrpc.client.ServerProxy(LJ_API)
+    proxy = make_proxy()
     ch = proxy.LJ.XMLRPC.getchallenge()["challenge"]
     return {
         "username": username,
@@ -118,6 +144,8 @@ def fetch_one(proxy, username, password, jitemid):
 def decode(val):
     if isinstance(val, xmlrpc.client.Binary):
         return val.data.decode("utf-8", errors="replace")
+    if isinstance(val, (int, float)):
+        return ""
     return val or ""
 
 
@@ -204,22 +232,21 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     print(f"ЖЖ-архив: {LJ_USER}.livejournal.com (с {START_YEAR})")
-    print("Пароль не сохраняется.")
-    password = getpass.getpass(f"Пароль для {LJ_USER}: ")
+    username, password = load_credentials()
 
-    proxy = xmlrpc.client.ServerProxy(LJ_API)
+    proxy = make_proxy()
 
     try:
-        auth = get_auth(LJ_USER, password)
+        auth = get_auth(username, password)
         info = proxy.LJ.XMLRPC.login(dict(auth))
-        print(f"OK: {decode(info.get('fullname', LJ_USER))}\n" + "-" * 50)
+        print(f"OK: {decode(info.get('fullname', username))}\n" + "-" * 50)
     except xmlrpc.client.Fault as e:
         print(f"Ошибка входа: {e.faultString}")
         return
 
     # шаг 1: получаем все ID
     print("Шаг 1: получаю список всех записей через syncitems...")
-    all_ids = get_all_item_ids(proxy, LJ_USER, password)
+    all_ids = get_all_item_ids(proxy, username, password)
 
     # шаг 2: определяем что уже есть
     done = load_progress()
@@ -236,7 +263,7 @@ def main():
     for i, jitemid in enumerate(todo, 1):
         time.sleep(DELAY)
         try:
-            event = fetch_one(proxy, LJ_USER, password, jitemid)
+            event = fetch_one(proxy, username, password, jitemid)
         except Exception as e:
             print(f"  [{i}/{len(todo)}] ID {jitemid}: ошибка — {e}")
             continue
