@@ -1,12 +1,14 @@
 """
-fetch_lj.py — скачивает публичные посты из ЖЖ через XML-RPC API.
+fetch_lj.py — скачивает все посты из ЖЖ через XML-RPC API.
+
+Алгоритм:
+  1. syncitems — получаем список всех ID записей журнала
+  2. Для каждого ID — getevents(selecttype=one) — скачиваем пост
 
 Использование:
     python scripts/fetch_lj.py
 
 Пароль вводится при запуске и нигде не сохраняется.
-Скачивает только публичные посты (security=public).
-Пагинация через beforeid — надёжный способ обойти весь журнал.
 """
 
 import os
@@ -22,8 +24,7 @@ LJ_USER = "knizhkin"
 START_YEAR = 2004
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lj")
 LJ_API = "https://www.livejournal.com/interface/xmlrpc"
-BATCH_SIZE = 50   # максимум по API
-DELAY = 1.0       # секунды между батчами
+DELAY = 0.5  # секунды между запросами
 
 
 def md5(s):
@@ -31,7 +32,6 @@ def md5(s):
 
 
 def get_auth(username, password):
-    """Challenge-response авторизация. Вызывать перед каждым запросом — challenge одноразовый."""
     proxy = xmlrpc.client.ServerProxy(LJ_API)
     ch = proxy.LJ.XMLRPC.getchallenge()["challenge"]
     return {
@@ -43,40 +43,85 @@ def get_auth(username, password):
     }
 
 
-def fetch_batch(proxy, username, password, before_id=None, attempt=0):
-    """Получает батч постов. before_id — пагинация назад по времени."""
-    params = get_auth(username, password)
-    params.update({
-        "selecttype": "lastn",
-        "howmany": BATCH_SIZE,
-        "noprops": 0,
-        "lineendings": "unix",
-    })
-    if before_id is not None:
-        params["beforeid"] = before_id
-
+def api_call(proxy, method, params, password, attempt=0):
+    """Вызов API с retry на сетевые ошибки."""
     try:
-        result = proxy.LJ.XMLRPC.getevents(params)
-        return result.get("events", [])
+        return getattr(proxy.LJ.XMLRPC, method)(params)
     except xmlrpc.client.Fault as e:
-        if "rate" in e.faultString.lower():
-            print("  [rate limit] жду 15 сек...")
-            time.sleep(15)
-            return fetch_batch(proxy, username, password, before_id, attempt)
-        print(f"  [API ошибка {e.faultCode}]: {e.faultString[:120]}")
-        return []
+        if "rate" in e.faultString.lower() or "limit" in e.faultString.lower() or e.faultCode == 404:
+            wait = 65
+            print(f"  [лимит] жду {wait} сек...")
+            time.sleep(wait)
+            params.update(get_auth(params["username"], password))
+            return api_call(proxy, method, params, password, attempt)
+        raise
     except Exception as e:
         if attempt < 5:
             wait = 10 * (attempt + 1)
-            print(f"  [сеть] {e} — retry {attempt+1}/5 через {wait} сек...")
+            print(f"  [сеть] retry {attempt+1}/5 через {wait} сек: {e}")
             time.sleep(wait)
-            return fetch_batch(proxy, username, password, before_id, attempt + 1)
-        print(f"  [сеть] не удалось после 5 попыток: {e}")
-        return []
+            return api_call(proxy, method, params, password, attempt + 1)
+        raise
+
+
+def get_all_item_ids(proxy, username, password):
+    """Получает список всех jitemid через syncitems."""
+    all_ids = {}  # jitemid -> time
+    lastsync = ""
+
+    while True:
+        params = get_auth(username, password)
+        params["lastsync"] = lastsync
+
+        result = api_call(proxy, "syncitems", params, password)
+        items = result.get("syncitems", [])
+        total = result.get("total", 0)
+
+        for item in items:
+            name = str(item.get("item", ""))
+            if name.startswith("L-"):
+                jitemid = int(name[2:])
+                all_ids[jitemid] = item.get("time", "")
+
+        print(f"  syncitems: получено {len(all_ids)}/{total}...", end="\r")
+
+        if not items or len(all_ids) >= total:
+            break
+
+        # lastsync = максимальное время из полученных
+        times = [item.get("time", "") for item in items if item.get("time")]
+        if times:
+            lastsync = max(times)
+        else:
+            break
+
+        time.sleep(0.3)
+
+    print(f"\n  Всего записей в журнале: {len(all_ids)}")
+    return all_ids
+
+
+def fetch_one(proxy, username, password, jitemid):
+    """Скачивает один пост по jitemid."""
+    params = get_auth(username, password)
+    params.update({
+        "selecttype": "one",
+        "itemid": jitemid,
+        "noprops": 0,
+        "lineendings": "unix",
+    })
+    result = api_call(proxy, "getevents", params, password)
+    events = result.get("events", [])
+    return events[0] if events else None
+
+
+def decode(val):
+    if isinstance(val, xmlrpc.client.Binary):
+        return val.data.decode("utf-8", errors="replace")
+    return val or ""
 
 
 def clean_markup(text):
-    """Минимальная очистка ЖЖ-разметки."""
     if not text:
         return ""
     text = re.sub(r'<lj-cut[^>]*>', '\n[---]\n', text, flags=re.I)
@@ -91,55 +136,41 @@ def clean_markup(text):
     return text.strip()
 
 
-def decode(val):
-    """Декодирует Binary или возвращает строку как есть."""
-    if isinstance(val, xmlrpc.client.Binary):
-        return val.data.decode("utf-8", errors="replace")
-    return val or ""
-
-
-def save_post(event, counters):
-    """Сохраняет пост. counters — dict для подсчёта."""
-    security = event.get("security", "public") or "public"
-    # скачиваем все посты владельца (включая приватные и friends-only)
-    # статус фиксируем в файле
-
-    eventtime = event.get("eventtime", "")  # "YYYY-MM-DD HH:MM:SS"
+def save_post(event, jitemid):
+    """Сохраняет пост. Возвращает путь или None если пропущен."""
+    eventtime = decode(event.get("eventtime", ""))
     m = re.match(r"(\d{4})-(\d{2})-(\d{2})", eventtime)
     if not m:
-        counters["skipped_nodate"] += 1
-        return
+        return None
 
     year, month, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
-
     if year < START_YEAR:
-        counters["skipped_old"] += 1
-        return
+        return None
 
     content = clean_markup(decode(event.get("event", "")))
     if not content:
-        counters["skipped_empty"] += 1
-        return
+        return None
 
     subject = re.sub(r'<[^>]+>', '', decode(event.get("subject", ""))).strip()
     subject = subject or "(без заголовка)"
 
+    security = decode(event.get("security", "")) or "public"
+    security_label = {"public": "публичный", "friends": "для друзей",
+                      "private": "приватный"}.get(security, security)
+
     props = event.get("props", {})
     taglist = decode(props.get("taglist", "") if isinstance(props, dict) else "")
 
-    itemid = event.get("itemid", 0)
-    url = f"https://{LJ_USER}.livejournal.com/{itemid}.html"
-    security_label = {"public": "публичный", "friends": "для друзей", "private": "приватный"}.get(security, security)
+    url = f"https://{LJ_USER}.livejournal.com/{event.get('itemid', jitemid)}.html"
 
     year_dir = os.path.join(OUTPUT_DIR, str(year))
     os.makedirs(year_dir, exist_ok=True)
 
-    filename = f"{year}-{month:02d}-{day:02d}-{itemid}.md"
+    filename = f"{year}-{month:02d}-{day:02d}-{jitemid}.md"
     path = os.path.join(year_dir, filename)
 
     if os.path.exists(path):
-        counters["already_exists"] += 1
-        return
+        return "exists"
 
     md_content = f"""# {subject}
 
@@ -155,8 +186,18 @@ def save_post(event, counters):
     with open(path, "w", encoding="utf-8") as f:
         f.write(md_content)
 
-    counters["saved"] += 1
-    return filename
+    return path
+
+
+def load_progress():
+    """Загружает список уже скачанных jitemid из файлов."""
+    done = set()
+    for root, _, files in os.walk(OUTPUT_DIR):
+        for f in files:
+            m = re.search(r"-(\d+)\.md$", f)
+            if m:
+                done.add(int(m.group(1)))
+    return done
 
 
 def main():
@@ -168,78 +209,58 @@ def main():
 
     proxy = xmlrpc.client.ServerProxy(LJ_API)
 
-    # проверка авторизации
     try:
         auth = get_auth(LJ_USER, password)
         info = proxy.LJ.XMLRPC.login(dict(auth))
-        print(f"OK: {info.get('fullname', LJ_USER)}\n" + "-" * 50)
+        print(f"OK: {decode(info.get('fullname', LJ_USER))}\n" + "-" * 50)
     except xmlrpc.client.Fault as e:
         print(f"Ошибка входа: {e.faultString}")
         return
 
-    counters = {
-        "saved": 0, "already_exists": 0,
-        "skipped_empty": 0, "skipped_old": 0, "skipped_nodate": 0,
-    }
+    # шаг 1: получаем все ID
+    print("Шаг 1: получаю список всех записей через syncitems...")
+    all_ids = get_all_item_ids(proxy, LJ_USER, password)
 
-    # resume: найти минимальный itemid среди уже сохранённых файлов
-    before_id = None
-    saved_ids = []
-    for root, _, files in os.walk(OUTPUT_DIR):
-        for f in files:
-            m = re.search(r"-(\d+)\.md$", f)
-            if m:
-                saved_ids.append(int(m.group(1)))
-    if saved_ids:
-        before_id = min(saved_ids) - 1
-        print(f"Продолжаю с before_id={before_id} (найдено {len(saved_ids)} файлов)")
-    else:
-        print("Начинаю с начала")
+    # шаг 2: определяем что уже есть
+    done = load_progress()
+    todo = sorted(k for k in all_ids.keys() if k not in done)
+    print(f"Уже скачано: {len(done)} | Осталось: {len(todo)}\n" + "-" * 50)
 
-    batch_num = 0
-    stop = False
+    if not todo:
+        print("Всё уже скачано.")
+        return
 
-    while not stop:
-        batch = fetch_batch(proxy, LJ_USER, password, before_id)
-        if not batch:
-            break
+    saved = 0
+    skipped = 0
 
-        batch_num += 1
-        min_id = None
-
-        for event in batch:
-            itemid = event.get("itemid", 0)
-            if min_id is None or itemid < min_id:
-                min_id = itemid
-
-            # проверяем год — если все посты старше START_YEAR, стоп
-            eventtime = event.get("eventtime", "")
-            yr_m = re.match(r"(\d{4})", eventtime)
-            if yr_m and int(yr_m.group(1)) < START_YEAR:
-                stop = True
-
-            fname = save_post(event, counters)
-            if fname:
-                print(f"  {fname}")
-
-        saved_total = counters["saved"] + counters["already_exists"]
-        print(f"[батч {batch_num}] +{counters['saved']} сохранено | всего: {saved_total} | min_id: {min_id}")
-
-        if min_id is not None:
-            before_id = min_id - 1  # строго меньше, иначе петля
-        else:
-            break
-
-        if len(batch) < BATCH_SIZE:
-            break  # последняя страница
-
+    for i, jitemid in enumerate(todo, 1):
         time.sleep(DELAY)
+        try:
+            event = fetch_one(proxy, LJ_USER, password, jitemid)
+        except Exception as e:
+            print(f"  [{i}/{len(todo)}] ID {jitemid}: ошибка — {e}")
+            continue
+
+        if not event:
+            skipped += 1
+            continue
+
+        result = save_post(event, jitemid)
+        if result and result != "exists":
+            subject = re.sub(r'<[^>]+>', '', decode(event.get("subject", "")) or "")[:45]
+            eventtime = decode(event.get("eventtime", ""))[:10]
+            print(f"  [{i}/{len(todo)}] {eventtime} {os.path.basename(result)}: {subject}")
+            saved += 1
+        elif result == "exists":
+            skipped += 1
+        else:
+            skipped += 1
+
+        if i % 100 == 0:
+            print(f"  --- прогресс: {i}/{len(todo)}, сохранено {saved} ---")
 
     print("\n" + "-" * 50)
-    print(f"Сохранено новых: {counters['saved']}")
-    print(f"Уже было: {counters['already_exists']}")
-    print(f"Пропущено (пусто/до {START_YEAR}): "
-          f"{counters['skipped_empty']+counters['skipped_old']}")
+    print(f"Сохранено: {saved} | Пропущено: {skipped}")
     print(f"Папка: {os.path.abspath(OUTPUT_DIR)}")
 
 
