@@ -64,7 +64,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*40 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*41 текст — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
@@ -90,6 +90,7 @@
 - [Чувства как культурная практика](texts/01-subjectivity/feelings-as-cultural-practice.md)
 - [Голоса машин](texts/01-subjectivity/voices-of-machines.md)
 - [Мера всех вещей](texts/01-subjectivity/measure-of-all-things.md)
+- [Не из правил](texts/01-subjectivity/not-from-rules.md)
 
 ### III. ПРАВО — Субъект в законе
 
