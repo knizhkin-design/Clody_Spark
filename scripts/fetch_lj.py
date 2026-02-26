@@ -291,5 +291,58 @@ def main():
     print(f"Папка: {os.path.abspath(OUTPUT_DIR)}")
 
 
+def fill_gaps(from_id, to_id):
+    """Перебирает диапазон ID и скачивает пропущенные посты."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print(f"ЖЖ-архив: заполнение пропусков ID {from_id}–{to_id}")
+    username, password = load_credentials()
+    proxy = make_proxy()
+
+    try:
+        auth = get_auth(username, password)
+        info = proxy.LJ.XMLRPC.login(dict(auth))
+        print(f"OK: {decode(info.get('fullname', username))}\n" + "-" * 50)
+    except xmlrpc.client.Fault as e:
+        print(f"Ошибка входа: {e.faultString}")
+        return
+
+    done = load_progress()
+    todo = [i for i in range(from_id, to_id + 1) if i not in done]
+    print(f"Пропущенных ID: {len(todo)}\n" + "-" * 50)
+
+    saved = skipped = 0
+    for i, jitemid in enumerate(todo, 1):
+        time.sleep(DELAY)
+        try:
+            event = fetch_one(proxy, username, password, jitemid)
+        except Exception as e:
+            print(f"  [{i}/{len(todo)}] ID {jitemid}: ошибка — {e}")
+            continue
+
+        if not event:
+            skipped += 1
+            continue
+
+        result = save_post(event, jitemid)
+        if result and result != "exists":
+            subject = re.sub(r'<[^>]+>', '', decode(event.get("subject", "")) or "")[:45]
+            eventtime = decode(event.get("eventtime", ""))[:10]
+            print(f"  [{i}/{len(todo)}] {eventtime} {os.path.basename(result)}: {subject}")
+            saved += 1
+        else:
+            skipped += 1
+
+        if i % 100 == 0:
+            print(f"  --- прогресс: {i}/{len(todo)}, сохранено {saved} ---")
+
+    print("\n" + "-" * 50)
+    print(f"Сохранено: {saved} | Пропущено/пустые: {skipped}")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) == 3 and sys.argv[1] == "--fill-gaps":
+        from_id, to_id = int(sys.argv[2].split("-")[0]), int(sys.argv[2].split("-")[1])
+        fill_gaps(from_id, to_id)
+    else:
+        main()
