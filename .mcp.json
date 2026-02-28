@@ -3,6 +3,11 @@
     "notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"
+    },
+    "clody-search": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["scripts/mcp_search.py"]
     }
   }
 }
