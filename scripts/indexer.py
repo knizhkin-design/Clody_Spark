@@ -33,6 +33,7 @@ CHROMA_DIR      = Path.home() / ".config/clody_spark/chroma"
 REPO_ROOT       = Path(__file__).parent.parent
 CORPUS_FILE     = REPO_ROOT / "corpus-annotations.md"
 LJ_DIR          = REPO_ROOT / "lj"
+POETRY_DIR      = REPO_ROOT / "poetry"
 COLLECTION_NAME = "clody_spark"
 
 SHORT = 600   # символов — порог: короткий текст кладём как есть
@@ -315,12 +316,87 @@ def index_lj(oai: OpenAI, collection, limit: int = 0, verbose=True):
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
+# ── Источник: poetry/ ────────────────────────────────────────────────────────
+
+def parse_poem_file(path: Path) -> dict | None:
+    """Парсит .md файл стихотворения из poetry/{author}/."""
+    raw = path.read_text(encoding="utf-8")
+    title_m = re.search(r"^# (.+)", raw, re.MULTILINE)
+    title   = title_m.group(1).strip() if title_m else path.stem
+    author_m = re.search(r"^Автор:\s*(.+)", raw, re.MULTILINE)
+    author   = author_m.group(1).strip() if author_m else ""
+    year_m   = re.search(r"^Год:\s*(.+)", raw, re.MULTILINE)
+    year     = year_m.group(1).strip() if year_m else ""
+    # Тело — всё после второй пустой строки (после метаданных)
+    body_m = re.search(r"\n\n(?:Автор:[^\n]+\n?(?:Год:[^\n]+)?\n?)\n(.+)", raw, re.DOTALL)
+    body   = body_m.group(1).strip() if body_m else ""
+    if not body:
+        return None
+    poet_slug = path.parent.name   # имя папки = ключ автора
+    doc_id    = f"poem_{poet_slug}_{path.stem}"
+    return {
+        "id":     doc_id,
+        "title":  title,
+        "author": author,
+        "year":   year,
+        "body":   body,
+        "slug":   poet_slug,
+    }
+
+
+def index_poetry(oai: OpenAI, collection, verbose=True):
+    if not POETRY_DIR.exists():
+        if verbose:
+            print("poetry/ не найдена, пропускаем")
+        return
+    existing_ids = set(collection.get(include=[])["ids"])
+    total_added  = 0
+
+    for poem_path in sorted(POETRY_DIR.rglob("*.md")):
+        poem = parse_poem_file(poem_path)
+        if not poem:
+            continue
+        if poem["id"] in existing_ids:
+            continue
+
+        meta = {
+            "title":  poem["title"],
+            "author": poem["author"],
+            "year":   poem["year"],
+            "source": "poetry",
+            "slug":   poem["slug"],
+        }
+        # Стихи векторизуем как есть (без аннотации)
+        items = get_embed_items(
+            doc_id    = poem["id"],
+            text      = poem["body"],
+            meta_base = meta,
+            oai       = oai,
+        )
+        if not items:
+            continue
+
+        vectors = embed([it["embed_text"] for it in items], oai)
+        collection.add(
+            ids        = [it["id"]       for it in items],
+            embeddings = vectors,
+            documents  = [it["document"] for it in items],
+            metadatas  = [it["metadata"] for it in items],
+        )
+        total_added += len(items)
+        if verbose:
+            print(f"  {poem['author']}: {poem['title'][:40]}")
+
+    if verbose:
+        print(f"\nПоэзия: добавлено {total_added}. Итого в базе: {collection.count()}")
+
+
 def stats(collection):
     count = collection.count()
     print(f"Записей в базе: {count}")
     if count > 0:
         # По источникам
-        for src in ("corpus", "lj"):
+        for src in ("corpus", "lj", "poetry"):
             res = collection.get(where={"source": src}, include=["metadatas"])
             print(f"  {src}: {len(res['ids'])}")
 
@@ -350,7 +426,7 @@ def search(query: str, oai: OpenAI, collection, n=5):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["corpus", "lj"], default="corpus")
+    parser.add_argument("--source", choices=["corpus", "lj", "poetry"], default="corpus")
     parser.add_argument("--limit",  type=int, default=0, help="Лимит постов ЖЖ (0 = все)")
     parser.add_argument("--stats",  action="store_true")
     parser.add_argument("--search", metavar="QUERY")
@@ -367,5 +443,7 @@ if __name__ == "__main__":
         search(args.search, oai_client, col)
     elif args.source == "lj":
         index_lj(oai_client, col, limit=args.limit)
+    elif args.source == "poetry":
+        index_poetry(oai_client, col)
     else:
         index_corpus(oai_client, col)

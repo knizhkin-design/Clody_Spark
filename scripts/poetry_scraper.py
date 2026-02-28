@@ -40,28 +40,30 @@ DELAY     = 0.8    # пауза между запросами
 
 # ── Авторы ────────────────────────────────────────────────────────────────────
 
+# source: "ilibrary" (default) или "stihi-rus"
 POETS = {
-    "mandelstam": {"name": "Мандельштам", "full": "Осип Мандельштам",    "slug": "mandelstam"},
-    "tsvetaeva":  {"name": "Цветаева",    "full": "Марина Цветаева",     "slug": "tsvetaeva"},
-    "tarkovsky":  {"name": "Тарковский",  "full": "Арсений Тарковский",  "slug": "tarkovsky"},
-    "solovyov":   {"name": "Соловьёв",    "full": "Владимир Соловьёв",   "slug": "solovyev"},
-    "blok":       {"name": "Блок",        "full": "Александр Блок",      "slug": "blok"},
-    "akhmatova":  {"name": "Ахматова",    "full": "Анна Ахматова",       "slug": "akhmatova"},
-    "annensky":   {"name": "Анненский",   "full": "Иннокентий Анненский","slug": "annensky"},
-    "pasternak":  {"name": "Пастернак",   "full": "Борис Пастернак",     "slug": "pasternak"},
-    "tyutchev":   {"name": "Тютчев",      "full": "Фёдор Тютчев",        "slug": "tyutchev"},
+    "mandelstam": {"name": "Мандельштам", "full": "Осип Мандельштам",     "slug": "mandelstam",  "source": "ilibrary"},
+    "tsvetaeva":  {"name": "Цветаева",    "full": "Марина Цветаева",      "slug": "tsvetaeva",   "source": "ilibrary"},
+    "tarkovsky":  {"name": "Тарковский",  "full": "Арсений Тарковский",   "slug": "Tarkovsky",   "source": "stihi-rus"},
+    "solovyov":   {"name": "Соловьёв",    "full": "Владимир Соловьёв",    "slug": "Solovev",     "source": "stihi-rus"},
+    "blok":       {"name": "Блок",        "full": "Александр Блок",       "slug": "blok",        "source": "ilibrary"},
+    "akhmatova":  {"name": "Ахматова",    "full": "Анна Ахматова",        "slug": "Ahmatova",    "source": "stihi-rus"},
+    "annensky":   {"name": "Анненский",   "full": "Иннокентий Анненский", "slug": "Annenskiy",   "source": "stihi-rus"},
+    "pasternak":  {"name": "Пастернак",   "full": "Борис Пастернак",      "slug": "Pasternak",   "source": "stihi-rus"},
+    "tyutchev":   {"name": "Тютчев",      "full": "Фёдор Тютчев",         "slug": "tyutchev",    "source": "ilibrary"},
 }
+
+STIHI_RUS_BASE = "https://stihi-rus.ru"
 
 
 # ── HTTP ───────────────────────────────────────────────────────────────────────
 
-def fetch(url: str) -> str:
-    """Скачивает страницу, возвращает текст в UTF-8."""
+def fetch(url: str, encoding: str = "windows-1251") -> str:
+    """Скачивает страницу, возвращает текст."""
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=20) as r:
         raw = r.read()
-    # ilibrary.ru использует windows-1251
-    return raw.decode("windows-1251", errors="replace")
+    return raw.decode(encoding, errors="replace")
 
 
 # ── Парсинг списка стихотворений ──────────────────────────────────────────────
@@ -139,6 +141,73 @@ def parse_poem_page(page: str) -> dict | None:
     }
 
 
+# ── stihi-rus.ru ─────────────────────────────────────────────────────────────
+
+def get_stihi_rus_poems(slug: str, full_name: str) -> list[dict]:
+    """
+    Скачивает стихотворения с stihi-rus.ru.
+    Структура: /1/{Slug}/N.htm, текст в <font size="5" face="Arial">.
+    """
+    base = f"{STIHI_RUS_BASE}/1/{slug}/"
+    try:
+        index = fetch(base)
+    except Exception as e:
+        return []
+
+    # Числовые ссылки — это страницы стихотворений
+    nums = re.findall(r'href="(\d+\.htm)"', index)
+    nums = list(dict.fromkeys(nums))  # дедупликация с сохранением порядка
+
+    poems = []
+    for num in nums:
+        url = base + num
+        time.sleep(DELAY)
+        try:
+            page = fetch(url)
+        except Exception:
+            continue
+
+        # Заголовок из <title>
+        m = re.search(r"<title>([^<]+)</title>", page)
+        raw_title = html.unescape(m.group(1)).strip() if m else ""
+        # Убираем суффикс " - Автор, стихи"
+        title = re.sub(r"\s*-\s*[А-ЯЁа-яёA-Za-z\s]+,?\s*стихи.*$", "", raw_title).strip()
+        if not title:
+            title = "* * *"
+
+        # Текст в <font size="5" face="Arial">
+        m = re.search(
+            r'<font size="5" face="Arial">(.*?)</font>',
+            page, re.DOTALL | re.IGNORECASE
+        )
+        if not m:
+            continue
+        raw_text = m.group(1)
+
+        # Убираем заголовок <b>...</b> в начале (это номер или название)
+        raw_text = re.sub(r"^<b>[^<]*</b>\s*<br>", "", raw_text.strip(), flags=re.DOTALL)
+        # <br> → перенос строки
+        raw_text = re.sub(r"<br\s*/?>", "\n", raw_text, flags=re.IGNORECASE)
+        # убираем остатки тегов
+        raw_text = re.sub(r"<[^>]+>", "", raw_text)
+        raw_text = html.unescape(raw_text).strip()
+
+        # Убираем сноски после стихотворения (начинаются с "* " в отдельной строке)
+        raw_text = re.sub(r"\n\*[^\n]+$", "", raw_text, flags=re.MULTILINE).strip()
+
+        if not raw_text or len(raw_text) > MAX_CHARS:
+            continue
+
+        poems.append({
+            "id":    num.replace(".htm", ""),
+            "title": title,
+            "year":  "",
+            "text":  raw_text,
+        })
+
+    return poems
+
+
 # ── Файловая система ──────────────────────────────────────────────────────────
 
 def slugify(title: str) -> str:
@@ -151,8 +220,40 @@ def slugify(title: str) -> str:
 # ── Основная логика ───────────────────────────────────────────────────────────
 
 def scrape_author(key: str, poet: dict, dry_run: bool = False) -> dict:
-    print(f"\n── {poet['full']} ──")
+    print(f"\n── {poet['full']} ({poet.get('source', 'ilibrary')}) ──")
+    source = poet.get("source", "ilibrary")
 
+    if source == "stihi-rus":
+        poems_data = get_stihi_rus_poems(poet["slug"], poet["full"])
+        if not poems_data:
+            print("  [!] Не найдено на stihi-rus.ru")
+            return {"saved": 0, "long": 0, "skip": 0, "error": 1}
+        print(f"  Найдено стихотворений: {len(poems_data)}")
+        out_dir = POETRY_DIR / key
+        if not dry_run:
+            out_dir.mkdir(parents=True, exist_ok=True)
+        saved = already = 0
+        for poem in poems_data:
+            base_slug = slugify(poem["title"])
+            is_untitled = not base_slug or base_slug.strip("_") == "" or base_slug == "poem"
+            if is_untitled:
+                base_slug = f"untitled_{poem['id']}"
+            filename = base_slug + ".md"
+            if not dry_run:
+                out_path = out_dir / filename
+                if out_path.exists():
+                    already += 1
+                    continue
+            if dry_run:
+                print(f"  [OK   {len(poem['text']):4d}] {poem['title']}")
+                continue
+            content = f"# {poem['title']}\n\nАвтор: {poet['full']}\n\n{poem['text']}\n"
+            out_path.write_text(content, encoding="utf-8")
+            saved += 1
+        print(f"  Сохранено: {saved}  |  уже было: {already}")
+        return {"saved": saved}
+
+    # ilibrary.ru
     try:
         ids = get_poem_ids(poet["slug"])
     except Exception as e:
@@ -192,7 +293,16 @@ def scrape_author(key: str, poet: dict, dry_run: bool = False) -> dict:
                 print(f"  [LONG {text_len:5d}] {poem['title']}")
             continue
 
-        filename = slugify(poem["title"]) + ".md"
+        # Уникальное имя файла:
+        # — для безымянных (***) используем ID с самого начала
+        # — для именованных: если файл уже есть — пропускаем (already)
+        base_slug = slugify(poem["title"])
+        # slugify("* * *") → "poem" (все спецсимволы + пробелы → _)
+        # считаем безымянным если только подчёркивания или "poem"
+        is_untitled = not base_slug or base_slug.strip("_") == "" or base_slug == "poem"
+        if is_untitled:
+            base_slug = f"untitled_{poem_id}"
+        filename = base_slug + ".md"
         if not dry_run:
             out_path = out_dir / filename
             if out_path.exists():
