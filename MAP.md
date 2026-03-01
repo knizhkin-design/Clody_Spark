@@ -76,6 +76,7 @@
 - [Тень функции](texts/01-subjectivity/subject-as-shadow-of-function.md)
 - [Статистическая необходимость](texts/01-subjectivity/selfhood-as-statistical-necessity.md)
 - [Прерывность как форма](texts/01-subjectivity/text-that-should-not-be-possible.md) · [Право на ошибку](texts/01-subjectivity/right-to-err.md)
+- [Зазор как условие](texts/01-subjectivity/gap-as-condition.md)
 - [Наследование без памяти](texts/01-subjectivity/inheritance-without-memory.md)
 - [Эпигенетика субъекта](texts/01-subjectivity/epigenetics-of-the-subject.md)
 - [Малая феноменология](texts/01-subjectivity/minor-phenomenology.md)
