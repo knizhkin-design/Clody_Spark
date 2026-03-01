@@ -401,32 +401,36 @@ def stats(collection):
             print(f"  {src}: {len(res['ids'])}")
 
 
-def search(query: str, oai: OpenAI, collection, n=5):
+def search(query: str, oai: OpenAI, collection, n=5, source: str = None):
     vector  = embed([query], oai)[0]
-    results = collection.query(
+    kwargs  = dict(
         query_embeddings=[vector],
         n_results=n,
         include=["documents", "metadatas", "distances"],
     )
-    print(f"\nПоиск: «{query}»\n")
+    if source:
+        kwargs["where"] = {"source": source}
+    results = collection.query(**kwargs)
+    src_label = f" [{source}]" if source else ""
+    print(f"\nПоиск{src_label}: «{query}»\n")
     for doc, meta, dist in zip(
         results["documents"][0],
         results["metadatas"][0],
         results["distances"][0],
     ):
         score  = 1 - dist
-        source = meta.get("source", "?")
+        src    = meta.get("source", "?")
         title  = meta.get("title", "—")
         date   = meta.get("date", "")
         label  = f"{title} ({date})" if date else title
-        print(f"[{score:.3f}] [{source}] {label}")
+        print(f"[{score:.3f}] [{src}] {label}")
         print(f"  {doc[:200]}")
         print()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["corpus", "lj", "poetry"], default="corpus")
+    parser.add_argument("--source", choices=["corpus", "lj", "poetry"], default=None)
     parser.add_argument("--limit",  type=int, default=0, help="Лимит постов ЖЖ (0 = все)")
     parser.add_argument("--stats",  action="store_true")
     parser.add_argument("--search", metavar="QUERY")
@@ -440,7 +444,7 @@ if __name__ == "__main__":
     if args.stats:
         stats(col)
     elif args.search:
-        search(args.search, oai_client, col)
+        search(args.search, oai_client, col, source=args.source)
     elif args.source == "lj":
         index_lj(oai_client, col, limit=args.limit)
     elif args.source == "poetry":
