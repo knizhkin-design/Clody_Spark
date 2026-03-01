@@ -68,7 +68,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*43 текста — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*44 текста — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
@@ -124,6 +124,7 @@
 - [Воин вне империи](texts/03-cultural-patterns/warrior-outside-empire.md)
 - [Мир вместо света](texts/03-cultural-patterns/peace-instead-of-light.md)
 - [ИИ как новое электричество](texts/03-cultural-patterns/ai-as-new-electricity.md)
+- [Игра в бисер — живая](texts/03-cultural-patterns/glass-bead-game.md)
 
 ---
 
