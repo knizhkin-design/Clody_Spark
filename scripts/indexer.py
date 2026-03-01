@@ -34,6 +34,7 @@ REPO_ROOT       = Path(__file__).parent.parent
 CORPUS_FILE     = REPO_ROOT / "corpus-annotations.md"
 LJ_DIR          = REPO_ROOT / "lj"
 POETRY_DIR      = REPO_ROOT / "poetry"
+TELEGRAM_DIR    = REPO_ROOT / "telegram"
 COLLECTION_NAME = "clody_spark"
 
 SHORT = 600   # символов — порог: короткий текст кладём как есть
@@ -391,6 +392,83 @@ def index_poetry(oai: OpenAI, collection, verbose=True):
         print(f"\nПоэзия: добавлено {total_added}. Итого в базе: {collection.count()}")
 
 
+# ── Источник: telegram/ ───────────────────────────────────────────────────────
+
+def parse_telegram_post(path: Path) -> dict | None:
+    """Парсит .md файл Telegram-поста из telegram/YYYY/MM/."""
+    raw = path.read_text(encoding="utf-8")
+    if "---" in raw:
+        header, _, body = raw.partition("---")
+    else:
+        header, body = "", raw
+
+    title_m = re.search(r"^# (.+)", header, re.MULTILINE)
+    title   = title_m.group(1).strip() if title_m else path.stem
+
+    date_m  = re.search(r"\*\*Дата:\*\*\s*(.+)", header)
+    date    = date_m.group(1).strip() if date_m else ""
+
+    body = body.strip()
+    if not body:
+        return None
+
+    doc_id = "tg_" + path.stem
+    return {
+        "id":      doc_id,
+        "title":   title,
+        "date":    date,
+        "body":    body,
+        "context": f"Дата: {date}. Заголовок: {title}." if (date or title) else "",
+    }
+
+
+def index_telegram(oai: OpenAI, collection, verbose=True):
+    if not TELEGRAM_DIR.exists():
+        if verbose:
+            print("telegram/ не найдена, пропускаем")
+        return
+
+    posts        = sorted(TELEGRAM_DIR.rglob("*.md"))
+    existing_ids = set(collection.get(include=[])["ids"])
+    total_added  = 0
+
+    for path in posts:
+        post = parse_telegram_post(path)
+        if not post:
+            continue
+        if post["id"] in existing_ids or f"{post['id']}__c0" in existing_ids:
+            continue
+
+        meta_base = {
+            "title":  post["title"],
+            "date":   post["date"],
+            "source": "telegram",
+        }
+        items = get_embed_items(
+            doc_id    = post["id"],
+            text      = post["body"],
+            meta_base = meta_base,
+            oai       = oai,
+            context   = post["context"],
+        )
+        if not items:
+            continue
+
+        vectors = embed([it["embed_text"] for it in items], oai)
+        collection.add(
+            ids        = [it["id"]       for it in items],
+            embeddings = vectors,
+            documents  = [it["document"] for it in items],
+            metadatas  = [it["metadata"] for it in items],
+        )
+        total_added += len(items)
+        if verbose:
+            print(f"  {post['id']}: {post['title'][:50]}")
+
+    if verbose:
+        print(f"\nTelegram: добавлено {total_added}. Итого в базе: {collection.count()}")
+
+
 def stats(collection):
     count = collection.count()
     print(f"Записей в базе: {count}")
@@ -430,7 +508,7 @@ def search(query: str, oai: OpenAI, collection, n=5, source: str = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["corpus", "lj", "poetry"], default=None)
+    parser.add_argument("--source", choices=["corpus", "lj", "poetry", "telegram"], default=None)
     parser.add_argument("--limit",  type=int, default=0, help="Лимит постов ЖЖ (0 = все)")
     parser.add_argument("--n",      type=int, default=5, help="Количество результатов поиска")
     parser.add_argument("--stats",  action="store_true")
@@ -450,5 +528,7 @@ if __name__ == "__main__":
         index_lj(oai_client, col, limit=args.limit)
     elif args.source == "poetry":
         index_poetry(oai_client, col)
+    elif args.source == "telegram":
+        index_telegram(oai_client, col)
     else:
         index_corpus(oai_client, col)
