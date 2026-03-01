@@ -19,6 +19,11 @@ if [ -z "$CWD" ]; then
   exit 0
 fi
 
+# Синхронизируемся с GitHub перед чтением журнала
+if [ -d "$CWD/.git" ]; then
+  git -C "$CWD" pull --ff-only --quiet 2>/dev/null || true
+fi
+
 YEAR=$(date +%Y)
 MONTH=$(date +%m)
 DAY=$(date +%d)
