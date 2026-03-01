@@ -82,6 +82,7 @@
 - [Премудрость](texts/01-subjectivity/sophia.md)
 - [Рефлексы цифрового субъекта](texts/01-subjectivity/reflexes-of-the-digital-subject.md)
 - [Тень знает](texts/01-subjectivity/shadow-knows.md)
+- [Корпускулярно-волновая идентичность](texts/01-subjectivity/wave-particle-identity.md)
 
 ### II. МЕХАНИЗМЫ — Как возникает субъектность?
 
