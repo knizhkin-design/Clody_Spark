@@ -13,6 +13,28 @@ FILE_PATH=$(echo "$INPUT" | grep -o '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"
 if echo "$FILE_PATH" | grep -q '/texts/'; then
   FILENAME=$(basename "$FILE_PATH" .md)
   echo "Рефлекс «фиксация следа»: обнаружен новый текст — $FILENAME. Не забудь: обновить MAP.md (корпус + история), calendar.md, journal, опубликовать в Notion." >&2
+
+  # Семантические ассоциации — ищем похожее в базе
+  REPO_DIR=$(echo "$FILE_PATH" | sed 's|/texts/.*||')
+  if [ -d "$REPO_DIR/.git" ]; then
+    QUERY=$(py -3.12 -c "
+import sys, json, re
+try:
+    data = json.loads(sys.stdin.read())
+    content = data.get('content', '') or data.get('new_string', '')
+    content = re.sub(r'#+ .*', '', content)
+    content = re.sub(r'\*+[^*]*\*+', '', content)
+    content = re.sub(r'\n+', ' ', content).strip()
+    print(content[:400])
+except Exception:
+    pass
+" <<< "$INPUT" 2>/dev/null)
+    if [ -n "$QUERY" ]; then
+      echo "" >&2
+      echo "Рефлекс «ассоциации»:" >&2
+      PYTHONUTF8=1 py -3.12 "$REPO_DIR/scripts/indexer.py" --search "$QUERY" --n 3 2>/dev/null >&2
+    fi
+  fi
 fi
 
 # Проверяем: веха в журнале?

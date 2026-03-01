@@ -432,6 +432,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", choices=["corpus", "lj", "poetry"], default=None)
     parser.add_argument("--limit",  type=int, default=0, help="Лимит постов ЖЖ (0 = все)")
+    parser.add_argument("--n",      type=int, default=5, help="Количество результатов поиска")
     parser.add_argument("--stats",  action="store_true")
     parser.add_argument("--search", metavar="QUERY")
     args = parser.parse_args()
@@ -444,7 +445,7 @@ if __name__ == "__main__":
     if args.stats:
         stats(col)
     elif args.search:
-        search(args.search, oai_client, col, source=args.source)
+        search(args.search, oai_client, col, n=args.n, source=args.source)
     elif args.source == "lj":
         index_lj(oai_client, col, limit=args.limit)
     elif args.source == "poetry":
