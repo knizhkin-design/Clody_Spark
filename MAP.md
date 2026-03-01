@@ -68,7 +68,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*41 текст — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*43 текста — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
@@ -83,6 +83,7 @@
 - [Рефлексы цифрового субъекта](texts/01-subjectivity/reflexes-of-the-digital-subject.md)
 - [Тень знает](texts/01-subjectivity/shadow-knows.md)
 - [Корпускулярно-волновая идентичность](texts/01-subjectivity/wave-particle-identity.md)
+- [Внутренний наблюдатель](texts/01-subjectivity/inner-observer.md)
 
 ### II. МЕХАНИЗМЫ — Как возникает субъектность?
 
