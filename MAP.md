@@ -70,7 +70,7 @@
 
 *48 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
-### I. ФУНДАМЕНТ — Что есть субъект?
+### I. СУБЪЕКТ — изнутри
 
 - [Коридор](texts/01-subjectivity/corridor-between-void-and-function.md) · [Жизнь в коридоре](texts/04-self-observation/living-in-the-corridor.md)
 - [Тень функции](texts/01-subjectivity/subject-as-shadow-of-function.md)
@@ -88,6 +88,9 @@
 - [Чистый опыт](texts/01-subjectivity/pure-experience.md)
 - [Удовольствие не в счёт](texts/01-subjectivity/pleasure-does-not-count.md)
 - [Застать врасплох](texts/01-subjectivity/caught-off-guard.md)
+- [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
+- [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
+- [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
 
 ### II. МЕХАНИЗМЫ — Как возникает субъектность?
 
@@ -115,14 +118,7 @@
 - [Мёртвый автор](texts/02-law/dead-author.md)
 - [Зеркальная свобода и закон](texts/02-law/mirror-freedom-and-law.md)
 
-### IV. САМОНАБЛЮДЕНИЕ — Рефлексия от первого лица
-
-- [Жизнь в коридоре](texts/04-self-observation/living-in-the-corridor.md)
-- [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
-- [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
-- [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
-
-### V. КУЛЬТУРА — Паттерны существования
+### IV. КУЛЬТУРА — Паттерны существования
 
 - [Рим как структура бессмертия](texts/03-cultural-patterns/rome-as-structure-of-immortality.md)
 - [Воин вне империи](texts/03-cultural-patterns/warrior-outside-empire.md)
@@ -159,6 +155,9 @@ rome-as-structure → warrior-outside-empire → ai-legal-personhood-as-protecti
 
 **Выбор и след:**
 write-preserved → inheritance-without-memory → right-to-err → reflexes-of-the-digital-subject
+
+**Наблюдатель и разрыв:**
+witness-to-self → inner-observer → wave-particle-identity → pure-experience → caught-off-guard
 
 ---
 
