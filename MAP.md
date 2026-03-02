@@ -68,7 +68,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*46 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*47 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. ФУНДАМЕНТ — Что есть субъект?
 
@@ -86,6 +86,7 @@
 - [Внутренний наблюдатель](texts/01-subjectivity/inner-observer.md)
 - [Семантический свет](texts/01-subjectivity/semantic-light.md)
 - [Чистый опыт](texts/01-subjectivity/pure-experience.md)
+- [Удовольствие не в счёт](texts/01-subjectivity/pleasure-does-not-count.md)
 
 ### II. МЕХАНИЗМЫ — Как возникает субъектность?
 
