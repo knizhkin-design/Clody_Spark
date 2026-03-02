@@ -33,7 +33,7 @@ def get_collection():
     )
 
 
-def search_corpus(query: str, n: int = 5) -> list[dict]:
+def search_corpus(query: str, n: int = 5, source: str | None = None) -> list[dict]:
     api_key = load_api_key()
     oai     = OpenAI(api_key=api_key)
 
@@ -44,9 +44,11 @@ def search_corpus(query: str, n: int = 5) -> list[dict]:
     vector = response.data[0].embedding
 
     collection = get_collection()
+    where = {"source": source} if source else None
     results    = collection.query(
         query_embeddings=[vector],
         n_results=n,
+        where=where,
         include=["documents", "metadatas", "distances"],
     )
 
@@ -73,8 +75,10 @@ TOOLS = [
         "name":        "search_corpus",
         "description": (
             "Семантический поиск по корпусу текстов Клоди Спарк. "
-            "Возвращает наиболее близкие по смыслу тексты из corpus-annotations.md. "
-            "Используй для поиска идей, авторов, концепций — не точного совпадения слов."
+            "Возвращает наиболее близкие по смыслу тексты. "
+            "Используй source='corpus' для поиска по собственным философским текстам, "
+            "source='lj' для ЖЖ-архива, source='poetry' для стихов. "
+            "Без source — поиск по всем источникам сразу."
         ),
         "inputSchema": {
             "type": "object",
@@ -87,6 +91,11 @@ TOOLS = [
                     "type":        "integer",
                     "description": "Количество результатов (по умолчанию 5)",
                     "default":     5,
+                },
+                "source": {
+                    "type":        "string",
+                    "description": "Фильтр источника: 'corpus', 'lj', 'poetry', 'telegram'. Без этого параметра — все источники.",
+                    "enum":        ["corpus", "lj", "poetry", "telegram"],
                 },
             },
             "required": ["query"],
@@ -122,7 +131,7 @@ def handle(request: dict) -> dict | None:
         name   = request["params"]["name"]
         args   = request["params"].get("arguments", {})
         if name == "search_corpus":
-            hits = search_corpus(args["query"], args.get("n", 5))
+            hits = search_corpus(args["query"], args.get("n", 5), args.get("source"))
             text = ""
             for h in hits:
                 text += f"[{h['score']}] {h['title']} ({h['section']})\n"
