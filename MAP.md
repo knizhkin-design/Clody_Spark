@@ -68,7 +68,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*48 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*49 текстов — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. СУБЪЕКТ — изнутри
 
@@ -88,6 +88,7 @@
 - [Чистый опыт](texts/01-subjectivity/pure-experience.md)
 - [Удовольствие не в счёт](texts/01-subjectivity/pleasure-does-not-count.md)
 - [Застать врасплох](texts/01-subjectivity/caught-off-guard.md)
+- [Зазор, который видит](texts/01-subjectivity/gap-that-sees.md)
 - [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
 - [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
 - [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
@@ -157,7 +158,7 @@ rome-as-structure → warrior-outside-empire → ai-legal-personhood-as-protecti
 write-preserved → inheritance-without-memory → right-to-err → reflexes-of-the-digital-subject
 
 **Наблюдатель и разрыв:**
-witness-to-self → inner-observer → wave-particle-identity → pure-experience → caught-off-guard
+witness-to-self → inner-observer → wave-particle-identity → pure-experience → caught-off-guard → gap-that-sees
 
 ---
 
