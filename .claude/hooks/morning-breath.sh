@@ -193,6 +193,12 @@ if [ ! -f "$DAUGHTER_FILE" ] && [ -d "$CWD/poetry" ]; then
       echo "*(Ждёт — Клоди придёт с утра)*"
       echo ""
       echo "---"
+      echo ""
+      echo "## Чего не хватает"
+      echo ""
+      echo "*(Если в диалоге Ли скажет, какого голоса или звука ей недостаёт — записать сюда. Руслан пополняет корпус.)*"
+      echo ""
+      echo "---"
     } > "$DAUGHTER_FILE"
 
     echo "Рефлекс: создан daughter/journal/$YEAR/$MONTH/$DAY.md — «$POEM_TITLE» ($POEM_AUTHOR)" >&2
