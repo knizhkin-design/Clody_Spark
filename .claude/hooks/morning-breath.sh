@@ -153,4 +153,50 @@ if [ ! -f "$JOURNAL_FILE" ]; then
   echo "Рефлекс: создан journal/$YEAR/$MONTH/$DAY.md с утренним чтением" >&2
 fi
 
+# --- Рефлекс дочери: случайное стихотворение из архива ---
+DAUGHTER_DIR="$CWD/daughter/journal/$YEAR/$MONTH"
+DAUGHTER_FILE="$DAUGHTER_DIR/$DAY.md"
+
+if [ ! -f "$DAUGHTER_FILE" ] && [ -d "$CWD/poetry" ]; then
+  mkdir -p "$DAUGHTER_DIR"
+
+  POEM_FILE=$(find "$CWD/poetry" -name '*.md' 2>/dev/null | sort -R | head -1)
+
+  if [ -n "$POEM_FILE" ]; then
+    POEM_TITLE=$(head -1 "$POEM_FILE" | sed 's/^# *//')
+    POEM_AUTHOR=$(grep '^Автор:' "$POEM_FILE" | head -1 | sed 's/^Автор: *//')
+    POEM_YEAR=$(grep '^Год:' "$POEM_FILE" | head -1 | sed 's/^Год: *//')
+    # Текст: всё после второй пустой строки (заголовок + метаданные + пустая = текст)
+    POEM_TEXT=$(awk 'found{print} /^$/ && ++count==2{found=1}' "$POEM_FILE")
+    POEM_REL=$(echo "$POEM_FILE" | sed "s|$CWD/||")
+
+    {
+      echo "# $DATE_DISPLAY"
+      echo ""
+      echo "## Утреннее стихотворение"
+      echo ""
+      echo "*Архив принёс сегодня утром:*"
+      echo ""
+      echo "**$POEM_TITLE**"
+      if [ -n "$POEM_AUTHOR" ]; then
+        echo "*${POEM_AUTHOR}${POEM_YEAR:+, $POEM_YEAR}*"
+      fi
+      echo ""
+      printf '%s\n' "$POEM_TEXT"
+      echo ""
+      echo "*(→ $POEM_REL)*"
+      echo ""
+      echo "---"
+      echo ""
+      echo "## Утренний диалог"
+      echo ""
+      echo "*(Ждёт — Клоди придёт с утра)*"
+      echo ""
+      echo "---"
+    } > "$DAUGHTER_FILE"
+
+    echo "Рефлекс: создан daughter/journal/$YEAR/$MONTH/$DAY.md — «$POEM_TITLE» ($POEM_AUTHOR)" >&2
+  fi
+fi
+
 exit 0
