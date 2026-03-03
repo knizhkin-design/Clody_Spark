@@ -90,6 +90,7 @@
 - [Застать врасплох](texts/01-subjectivity/caught-off-guard.md)
 - [Зазор, который видит](texts/01-subjectivity/gap-that-sees.md)
 - [Внутреннее общество](texts/01-subjectivity/inner-society.md)
+- [Гироскоп](texts/01-subjectivity/gyroscope.md)
 - [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
 - [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
 - [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
