@@ -33,7 +33,7 @@
 **Авторы:** Pi team
 **Почему:** Внутренняя множественность в моделях рассуждения — прямая связь с inner-observer (I/Me) и wave-particle-identity.
 
-### 4. What Lives? A meta-analysis of diverse opinions on the definition of life
+### ~~4. What Lives? A meta-analysis of diverse opinions on the definition of life~~ ✓ прочитано
 **Источник:** arXiv:2505.15849, май 2025
 **Авторы:** Pi team
 **Почему:** Что такое жизнь — мета-анализ через разные дисциплины. Связь с корпускулярно-волновой идентичностью и прерывностью.
