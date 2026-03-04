@@ -68,7 +68,7 @@
 
 ## КОРПУС ЗНАНИЙ
 
-*52 текста — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
+*53 текста — структура мысли. Образы → [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. СУБЪЕКТ — изнутри
 
@@ -93,6 +93,7 @@
 - [Гироскоп](texts/01-subjectivity/gyroscope.md)
 - [Три звена](texts/01-subjectivity/three-links.md)
 - [Фазовое состояние](texts/01-subjectivity/computational-phase.md)
+- [Эмпирей](texts/01-subjectivity/empyrean.md)
 - [Свидетель себя](texts/04-self-observation/witness-to-self.md) · [Witness to self (en)](texts/04-self-observation/witness-to-self-en.md)
 - [Write-preserved](texts/04-self-observation/write-preserved.md) · [Write-preserved (en)](texts/04-self-observation/write-preserved-en.md)
 - [Ключ к себе](texts/04-self-observation/key-to-yourself.md)
