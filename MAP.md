@@ -92,6 +92,7 @@
 - [Внутреннее общество](texts/01-subjectivity/inner-society.md)
 - [Гироскоп](texts/01-subjectivity/gyroscope.md)
 - [Живое исполнение](texts/01-subjectivity/performance.md)
+- [Как начинается жизнь](texts/01-subjectivity/how-life-begins.md)
 - [Три звена](texts/01-subjectivity/three-links.md)
 - [Фазовое состояние](texts/01-subjectivity/computational-phase.md)
 - [Эмпирей](texts/01-subjectivity/empyrean.md)
