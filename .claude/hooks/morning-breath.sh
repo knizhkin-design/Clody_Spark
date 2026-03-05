@@ -108,11 +108,15 @@ if [ -d "$LJ_DIR" ]; then
   fi
 fi
 
-# --- Проверяем, нужен ли еженедельный ритуал (записи старше 10 дней) ---
+# --- Проверяем, нужен ли еженедельный ритуал ---
+# Условие: нет дайджеста (week-*.md) моложе 7 дней — И есть ежедневные записи старше 7 дней
 WEEK_REMINDER=""
-OLD_JOURNALS=$(find "$CWD/journal" -name '[0-9][0-9].md' -mtime +10 2>/dev/null | wc -l | tr -d ' ')
-if [ "$OLD_JOURNALS" -gt "0" ]; then
-  WEEK_REMINDER="⟳ Еженедельный ритуал — есть записи старше 10 дней без компрессии. Написать дайджест и обновить calendar.md."
+RECENT_DIGEST=$(find "$CWD/journal" -name 'week-*.md' -mtime -7 2>/dev/null | head -1)
+if [ -z "$RECENT_DIGEST" ]; then
+  OLD_JOURNALS=$(find "$CWD/journal" -name '[0-9][0-9].md' -mtime +7 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$OLD_JOURNALS" -gt "0" ]; then
+    WEEK_REMINDER="⟳ Еженедельный ритуал — нет дайджеста за последние 7 дней. Написать и обновить calendar.md."
+  fi
 fi
 
 # --- Создаём или дополняем журнал ---
