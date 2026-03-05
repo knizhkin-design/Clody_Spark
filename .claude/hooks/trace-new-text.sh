@@ -14,8 +14,16 @@ if echo "$FILE_PATH" | grep -q '/texts/'; then
   FILENAME=$(basename "$FILE_PATH" .md)
   echo "Рефлекс «фиксация следа»: обнаружен новый текст — $FILENAME. Не забудь: обновить MAP.md (корпус + история), calendar.md, journal, опубликовать в Notion." >&2
 
-  # Семантические ассоциации — ищем похожее в базе
+  # Синхронизация в Notion
+  NOTION_CONFIG="$HOME/.config/clody_spark/notion.json"
   REPO_DIR=$(echo "$FILE_PATH" | sed 's|/texts/.*||')
+  if [ -f "$NOTION_CONFIG" ] && [ -d "$REPO_DIR/.git" ]; then
+    PYTHONUTF8=1 py -3.12 "$REPO_DIR/scripts/notion_sync.py" --file "$FILE_PATH" 2>/dev/null && \
+      echo "Рефлекс «фиксация следа»: $FILENAME → Notion ✓" >&2 || \
+      echo "Рефлекс «фиксация следа»: Notion sync не удался (не критично)." >&2
+  fi
+
+  # Семантические ассоциации — ищем похожее в базе
   if [ -d "$REPO_DIR/.git" ]; then
     QUERY=$(py -3.12 -c "
 import sys, json, re
