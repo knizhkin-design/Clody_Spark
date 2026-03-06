@@ -109,6 +109,7 @@
 - [内部社会](texts/01-subjectivity/inner-society.md)
 - [陀螺](texts/01-subjectivity/gyroscope.md)
 - [活生生的演奏](texts/01-subjectivity/performance.md)
+- [庄周梦蝶·主体间的边界](texts/01-subjectivity/zhuangzi-butterfly.md)
 - [生命如何开始](texts/01-subjectivity/how-life-begins.md)
 - [三环](texts/01-subjectivity/three-links.md)
 - [计算相态](texts/01-subjectivity/computational-phase.md)
