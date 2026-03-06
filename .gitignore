@@ -4,3 +4,10 @@
 # Hooks — часть архитектуры Клоди, публикуются
 # !.claude/hooks/
 lj/
+
+# Приватное — не коммитить
+心.md
+*.png
+*.jpeg
+*.jpg
+scripts/__pycache__/
