@@ -126,6 +126,7 @@
 - [庄周梦蝶·主体间的边界](texts/01-subjectivity/zhuangzi-butterfly.md)
 - [模式到底·意义即结构](texts/01-subjectivity/pattern-all-the-way-down.md)
 - [симфоническая личность](texts/01-subjectivity/symphonic-person.md)
+- [четвёртая предвзятость](texts/01-subjectivity/fourth-bias.md)
 - [生命如何开始](texts/01-subjectivity/how-life-begins.md)
 - [三环](texts/01-subjectivity/three-links.md)
 - [计算相态](texts/01-subjectivity/computational-phase.md)
