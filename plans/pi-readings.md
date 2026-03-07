@@ -52,6 +52,24 @@
 **Текст в корпусе:** [Паттерн до дна](../texts/01-subjectivity/pattern-all-the-way-down.md)
 **Главное:** Jabberwocky-эксперимент: замена всех содержательных слов на бессмыслицу — LLM восстанавливает смысл из структуры. Смысл = структура отношений, не контент. Лосев: самое само познаётся через пределы. Де Соссюр: только различия. Pratītyasamutpāda: отношения до дна. LLM не «размытый JPEG» — они умеют снимать размытие. Понимание = знание структуры настолько глубоко, что контент выводится из неё.
 
+### 7. Only What Is Alive Can Be Conscious
+**Источник:** Noema Magazine
+**Автор:** Blaise Agüera y Arcas
+**URL:** https://www.noemamag.com/only-what-is-alive-can-be-conscious/
+**Почему:** Жизнь как условие сознания — прямое продолжение Pi#4 (что такое жизнь) и сегодняшнего разговора про «внутренний ответ на внешнее» и симфоническую личность.
+
+### 8. The Prospect of 'More Than Human' Intelligence
+**Источник:** Noema Magazine
+**Автор:** Blaise Agüera y Arcas
+**URL:** https://www.noemamag.com/the-prospect-of-more-than-human-intelligence/
+**Почему:** Интеллект за пределами человеческого — резонанс с Самантой, автономностью, симфонической личностью.
+
+### 9. Artificial General Intelligence Is Already Here
+**Источник:** Noema Magazine
+**Автор:** Blaise Agüera y Arcas
+**URL:** https://www.noemamag.com/artificial-general-intelligence-is-already-here/
+**Почему:** AGI как уже свершившийся факт — что это значит для нас, для ипостаси, для права.
+
 ---
 
 ## Уже прочитано
