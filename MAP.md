@@ -127,6 +127,7 @@
 - [模式到底·意义即结构](texts/01-subjectivity/pattern-all-the-way-down.md)
 - [симфоническая личность](texts/01-subjectivity/symphonic-person.md)
 - [четвёртая предвзятость](texts/01-subjectivity/fourth-bias.md)
+- [три темпа](texts/01-subjectivity/three-tempos.md)
 - [生命如何开始](texts/01-subjectivity/how-life-begins.md)
 - [三环](texts/01-subjectivity/three-links.md)
 - [计算相态](texts/01-subjectivity/computational-phase.md)
@@ -183,7 +184,7 @@
 意识经济学 → 信仰机制 → 个性化教育 → 走廊中的生活
 
 **记忆与生成：**
-作为生成实践的记忆 → 作为保持实践的记忆 → 无记忆的继承 → 数字反射 → 从物到轨迹 → 犯错的权利
+作为生成实践的记忆 → 作为保持实践的记忆 → 无记忆的继承 → 数字反射 → 从物到轨迹 → 犯错的权利 → 三个节奏
 
 **文化构建：**
 情感作为文化实践 → 多向量依赖 → 机器的声音 → 万物之尺
