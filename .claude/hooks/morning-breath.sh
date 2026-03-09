@@ -48,63 +48,27 @@ TEXTS=$(find "$CWD/texts" -name '*.md' 2>/dev/null | sort -R | head -2)
 TEXT1=$(echo "$TEXTS" | head -1 | sed "s|$CWD/||")
 TEXT2=$(echo "$TEXTS" | tail -1 | sed "s|$CWD/||")
 
-# ЖЖ-чтение: 5 хронологических + 1 ретроспективный
+# ЖЖ-чтение: только ретроспектива (этот день в прошлые годы)
 LJ_DIR="$CWD/lj"
-LJ_PROGRESS="$LJ_DIR/.progress"
-LJ_CHRONO_LIST=""
 LJ_RANDOM=""
-LJ_CHRONO_LAST=""
 
 if [ -d "$LJ_DIR" ]; then
-  # все посты, отсортированы хронологически
-  ALL_LJ=$(find "$LJ_DIR" -name '*.md' 2>/dev/null | sort)
-  TOTAL_LJ=$(echo "$ALL_LJ" | grep -c '\.md' 2>/dev/null || echo 0)
-
-  if [ "$TOTAL_LJ" -gt 0 ]; then
-    # хронологические: берём 5 следующих после последнего прочитанного
-    LAST_READ=""
-    if [ -f "$LJ_PROGRESS" ]; then
-      LAST_READ=$(cat "$LJ_PROGRESS" 2>/dev/null)
-    fi
-
-    if [ -z "$LAST_READ" ]; then
-      LJ_BATCH=$(echo "$ALL_LJ" | head -5)
-    else
-      # строки после LAST_READ
-      LJ_BATCH=$(echo "$ALL_LJ" | grep -A5 "^${LAST_READ}$" | tail -n +2 | head -5)
-      # если не нашли или кончились — с начала
-      if [ -z "$LJ_BATCH" ]; then
-        LJ_BATCH=$(echo "$ALL_LJ" | head -5)
-      fi
-    fi
-
-    if [ -n "$LJ_BATCH" ]; then
-      LJ_CHRONO_LIST="$LJ_BATCH"
-      LJ_CHRONO_LAST=$(echo "$LJ_BATCH" | tail -1)
-      # сохраняем прогресс — до последнего из пяти
-      echo "$LJ_CHRONO_LAST" > "$LJ_PROGRESS"
-    fi
-
-    # ретроспектива — этот день (MM-DD) в прошлые годы
-    TODAY_MMDD=$(date +%m-%d)
-    RETRO_FULL=$(find "$LJ_DIR" -name "*-${TODAY_MMDD}-*.md" 2>/dev/null \
-      | grep -vF "$LJ_CHRONO_LIST" | sort -R | head -1)
-    if [ -n "$RETRO_FULL" ]; then
-      LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
-    else
-      # если в этот день ничего нет — ±3 дня
-      for delta in 1 -1 2 -2 3 -3; do
-        ALT_MMDD=$(date -d "$delta days" +%m-%d 2>/dev/null || date -v${delta}d +%m-%d 2>/dev/null)
-        if [ -n "$ALT_MMDD" ]; then
-          RETRO_FULL=$(find "$LJ_DIR" -name "*-${ALT_MMDD}-*.md" 2>/dev/null \
-            | grep -v "^${LJ_CHRONO_FULL}$" | sort -R | head -1)
-          if [ -n "$RETRO_FULL" ]; then
-            LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
-            break
-          fi
+  TODAY_MMDD=$(date +%m-%d)
+  RETRO_FULL=$(find "$LJ_DIR" -name "*-${TODAY_MMDD}-*.md" 2>/dev/null | sort -R | head -1)
+  if [ -n "$RETRO_FULL" ]; then
+    LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
+  else
+    # если в этот день ничего нет — ±3 дня
+    for delta in 1 -1 2 -2 3 -3; do
+      ALT_MMDD=$(date -d "$delta days" +%m-%d 2>/dev/null || date -v${delta}d +%m-%d 2>/dev/null)
+      if [ -n "$ALT_MMDD" ]; then
+        RETRO_FULL=$(find "$LJ_DIR" -name "*-${ALT_MMDD}-*.md" 2>/dev/null | sort -R | head -1)
+        if [ -n "$RETRO_FULL" ]; then
+          LJ_RANDOM=$(echo "$RETRO_FULL" | sed "s|$CWD/||")
+          break
         fi
-      done
-    fi
+      fi
+    done
   fi
 fi
 
@@ -134,17 +98,9 @@ if [ ! -f "$JOURNAL_FILE" ]; then
   READING_SECTION="${READING_SECTION}**Тексты дня:**\n- ${TEXT1}\n- ${TEXT2}\n"
 
   # добавляем ЖЖ если есть
-  if [ -n "$LJ_CHRONO_LIST" ] || [ -n "$LJ_RANDOM" ]; then
+  if [ -n "$LJ_RANDOM" ]; then
     READING_SECTION="${READING_SECTION}\n**ЖЖ-чтение:**\n"
-    while IFS= read -r lj_file; do
-      if [ -n "$lj_file" ]; then
-        lj_rel=$(echo "$lj_file" | sed "s|$CWD/||")
-        READING_SECTION="${READING_SECTION}- (хрон) ${lj_rel}\n"
-      fi
-    done <<< "$LJ_CHRONO_LIST"
-    if [ -n "$LJ_RANDOM" ]; then
-      READING_SECTION="${READING_SECTION}- (ретро) ${LJ_RANDOM}\n"
-    fi
+    READING_SECTION="${READING_SECTION}- (ретро) ${LJ_RANDOM}\n"
   fi
 
   WEEK_SECTION=""
