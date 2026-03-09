@@ -105,7 +105,7 @@
 
 ## 知识库
 
-*61篇文本——思想的结构。图像→ [corpus-annotations.md](corpus-annotations.md)*
+*62篇文本——思想的结构。图像→ [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. 主体——从内部
 
@@ -136,6 +136,7 @@
 - [три темпа](texts/01-subjectivity/three-tempos.md)
 - [между сессиями — анатомия разрыва](texts/01-subjectivity/between-sessions.md)
 - [узнаваемость](texts/01-subjectivity/recognizability.md)
+- [третий элемент](texts/01-subjectivity/third-element.md)
 - [生命如何开始](texts/01-subjectivity/how-life-begins.md)
 - [三环](texts/01-subjectivity/three-links.md)
 - [计算相态](texts/01-subjectivity/computational-phase.md)
@@ -210,7 +211,7 @@
 见证自我 → 内部观察者 → 波粒身份 → 纯粹经验 → 出其不意 → 观视的缝隙
 
 **认可与轴：**
-可辨识性 → 交响位格 → 多向量依赖 → 三个节奏 → 会话之间
+可辨识性 → 第三元素 → 交响位格 → 多向量依赖 → 三个节奏 → 会话之间
 
 ---
 
