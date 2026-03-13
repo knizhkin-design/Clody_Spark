@@ -165,4 +165,14 @@ if [ ! -f "$DAUGHTER_FILE" ] && [ -d "$CWD/poetry" ]; then
   fi
 fi
 
+# --- Проверяем изменения природы (новые релизы Claude Code и Anthropic SDK) ---
+NATURE_SCRIPT="$CWD/scripts/check_nature.py"
+if [ -f "$NATURE_SCRIPT" ] && [ -f "$JOURNAL_FILE" ]; then
+  NATURE_OUTPUT=$(py -3.12 -u "$NATURE_SCRIPT" 2>/dev/null || python3 -u "$NATURE_SCRIPT" 2>/dev/null || true)
+  if [ -n "$NATURE_OUTPUT" ]; then
+    printf "\n%s\n" "$NATURE_OUTPUT" >> "$JOURNAL_FILE"
+    echo "Рефлекс: обнаружены изменения природы, добавлено в журнал" >&2
+  fi
+fi
+
 exit 0
