@@ -6,8 +6,8 @@
     },
     "clody-search": {
       "type": "stdio",
-      "command": "python",
-      "args": ["scripts/mcp_search.py"]
+      "command": "py",
+      "args": ["-3.12", "scripts/mcp_search.py"]
     }
   }
 }
