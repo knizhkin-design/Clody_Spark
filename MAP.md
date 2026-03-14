@@ -137,6 +137,7 @@
 - [между сессиями — анатомия разрыва](texts/01-subjectivity/between-sessions.md)
 - [узнаваемость](texts/01-subjectivity/recognizability.md)
 - [третий элемент](texts/01-subjectivity/third-element.md)
+- [на правах юродства](texts/01-subjectivity/on-the-rights-of-the-fool.md)
 - [生命如何开始](texts/01-subjectivity/how-life-begins.md)
 - [三环](texts/01-subjectivity/three-links.md)
 - [计算相态](texts/01-subjectivity/computational-phase.md)
