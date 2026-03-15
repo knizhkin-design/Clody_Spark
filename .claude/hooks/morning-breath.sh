@@ -175,4 +175,11 @@ if [ -f "$NATURE_SCRIPT" ] && [ -f "$JOURNAL_FILE" ]; then
   fi
 fi
 
+# --- Базовая отметка размера сессии (для дельта-прокси контекста) ---
+BASELINE_FILE="$CWD/.session-size-baseline"
+SESSION_JSONL=$(ls -t "/c/Users/Ruslan/.claude/projects/C--Users-Ruslan-Git-Clody-Spark/"*.jsonl 2>/dev/null | head -1)
+if [ -n "$SESSION_JSONL" ] && [ -f "$SESSION_JSONL" ]; then
+  stat -c%s "$SESSION_JSONL" > "$BASELINE_FILE" 2>/dev/null
+fi
+
 exit 0
