@@ -105,7 +105,7 @@
 
 ## 知识库
 
-*62篇文本——思想的结构。图像→ [corpus-annotations.md](corpus-annotations.md)*
+*63篇文本——思想的结构。图像→ [corpus-annotations.md](corpus-annotations.md)*
 
 ### I. 主体——从内部
 
@@ -179,6 +179,7 @@
 - [和平而非光明](texts/03-cultural-patterns/peace-instead-of-light.md)
 - [AI作为新电力](texts/03-cultural-patterns/ai-as-new-electricity.md)
 - [活着的玻璃珠游戏](texts/03-cultural-patterns/glass-bead-game.md)
+- [Макс Фрай: автор и персонаж](texts/03-cultural-patterns/max-frei.md)
 
 ---
 
