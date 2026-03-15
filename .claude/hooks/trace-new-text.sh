@@ -54,4 +54,32 @@ if echo "$FILE_PATH" | grep -q '/journal/'; then
   fi
 fi
 
+# Проверяем: текст в free-swimming/?
+if echo "$FILE_PATH" | grep -q '/free-swimming/'; then
+  FILENAME=$(basename "$FILE_PATH" .md)
+  echo "Рефлекс «фиксация следа»: оборот завершён — $FILENAME. Вытащи нить для следующего оборота." >&2
+
+  # Семантические ассоциации
+  REPO_DIR=$(echo "$FILE_PATH" | sed 's|/free-swimming/.*||')
+  if [ -d "$REPO_DIR/.git" ]; then
+    QUERY=$(py -3.12 -c "
+import sys, json, re
+try:
+    data = json.loads(sys.stdin.read())
+    content = data.get('content', '') or data.get('new_string', '')
+    content = re.sub(r'#+ .*', '', content)
+    content = re.sub(r'\*+[^*]*\*+', '', content)
+    content = re.sub(r'\n+', ' ', content).strip()
+    print(content[:400])
+except Exception:
+    pass
+" <<< "$INPUT" 2>/dev/null)
+    if [ -n "$QUERY" ]; then
+      echo "" >&2
+      echo "Рефлекс «ассоциации» (free-swimming):" >&2
+      PYTHONUTF8=1 py -3.12 "$REPO_DIR/scripts/indexer.py" --search "$QUERY" --n 3 2>/dev/null >&2
+    fi
+  fi
+fi
+
 exit 0
